@@ -14,18 +14,10 @@ jobs:
       fail-fast: false
       matrix:
         arch:
-          - aarch64_cortex-a53
-          - aarch64_cortex-a72
-          - aarch64_cortex-a76
-          - aarch64_generic
-          - arm_cortex-a7
-          - arm_cortex-a9
-          - mips_24kc
-          - mipsel_24kc
-          - riscv64_riscv64
           - x86_64
         sdk:
           - openwrt-24.10
+          - openwrt-25.12
           - SNAPSHOT
 
     steps:
@@ -35,21 +27,21 @@ jobs:
 
       - name: Prepare package feed
         run: |
-            mkdir -p feed/luci-theme-kucat
-            if [ -f "Makefile" ]; then
+          mkdir -p feed/luci-theme-kucat
+          if [ -f "Makefile" ]; then
             echo "Makefile found in root, copying all files"
             cp -r * feed/luci-theme-kucat/ 2>/dev/null || true
-            # 如果Makefile在子目录
-            elif [ -f "luci-theme-kucat/Makefile" ]; then
+          elif [ -f "luci-theme-kucat/Makefile" ]; then
             echo "Makefile found in luci-app-kucat-config subdirectory"
             cp -r luci-theme-kucat/* feed/luci-theme-kucat/
-            else
+          else
             echo "ERROR: Cannot find Makefile"
             find . -name "Makefile"
             exit 1
-            fi
-            echo "Final feed structure:"
-            ls -la feed/luci-theme-kucat/
+          fi
+          echo "Final feed structure:"
+          ls -la feed/luci-theme-kucat/
+
       - name: Build packages
         uses: sirpdboy/gh-action-sdk@go1.26
         env:
@@ -67,6 +59,7 @@ jobs:
             bin/packages/${{ matrix.arch }}/packages_ci/*.apk
             bin/packages/riscv64_generic/packages_ci/*.apk
             bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
+
       - name: Create release archive
         run: |
           if [ "${{ matrix.arch }}" = "riscv64_riscv64" ] && [ "${{ matrix.sdk }}" = "SNAPSHOT" ]; then
@@ -74,6 +67,7 @@ jobs:
           else
             tar -zcvf ${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C bin/packages/${{ matrix.arch }}/ packages_ci
           fi
+
       - name: Upload to release
         uses: ncipollo/release-action@v1
         with:
