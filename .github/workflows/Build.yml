@@ -17,6 +17,7 @@ jobs:
           - x86_64
         sdk:
           - openwrt-25.12
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -69,6 +70,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           name: ${{ github.ref_name }}
+          tag: ${{ github.ref_type == 'tag' && github.ref_name || 'nightly' }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           replacesArtifacts: true
