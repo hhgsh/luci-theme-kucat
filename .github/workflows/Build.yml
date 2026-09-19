@@ -69,10 +69,10 @@ jobs:
       - name: Upload to release
         uses: ncipollo/release-action@v1
         with:
-          name: ${{ github.ref_name }}
+          name: ${{ github.ref_type == 'tag' && github.ref_name || 'Nightly Build' }}
           tag: ${{ github.ref_type == 'tag' && github.ref_name || 'nightly' }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           replacesArtifacts: true
-          prerelease: false
+          prerelease: ${{ github.ref_type != 'tag' }} # 如果不是正式 Tag，自动标记为预发布版本
           artifacts: "${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz"
